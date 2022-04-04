@@ -58,6 +58,13 @@ contract UserPlanSubscriptions is ServicePlans {
     bool isActive
   );
 
+  event Unsubscribed (
+    uint256 subscriptionId,
+    uint256 planId,
+    uint256 overdue,
+    bool isActive
+  );
+
   mapping(uint256 => Subscription) subscriptions;
   mapping(uint256 => uint256[]) planToSubscriptions;
   mapping(address => uint256[]) userToSubscriptions;
@@ -219,6 +226,7 @@ contract UserPlanSubscriptions is ServicePlans {
         _userSubs.pop();
       }
     }
+    emit Unsubscribed(_subscriptionId, subscriptions[_subscriptionId].planId, subscriptions[_subscriptionId].overdue, subscriptions[_subscriptionId].isActive);
   }
 
   function _getServiceOwnerOfSubscription(uint256 _subscriptionId)
@@ -314,7 +322,7 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
-  function inactivateAllOverdueSubscriptions() public {
+  function inactivateAllOverdueSubscriptions() external {
     uint256[] storage _userServices = ownerToServices[msg.sender];
     for (uint256 i = 0; i < _userServices.length; i++) {
       inactivateAllOverdueSubscriptionsOfService(_userServices[i]);
@@ -324,7 +332,7 @@ contract UserPlanSubscriptions is ServicePlans {
   /**
    * @dev fetch all subscriptions of the user
    */
-  function getSubsByUser() public view returns (UserSubsDetails[] memory) {
+  function getSubsByUser() external view returns (UserSubsDetails[] memory) {
     uint256 numSubs = userToSubscriptions[msg.sender].length;
     UserSubsDetails[] memory _userSubs = new UserSubsDetails[](numSubs);
 
@@ -344,7 +352,7 @@ contract UserPlanSubscriptions is ServicePlans {
     return _userSubs;
   }
 
-  function totalAmountDueToAllSubs() public view returns (uint256 _totalDue) {
+  function totalAmountDueToAllSubs() external view returns (uint256 _totalDue) {
     uint256 _numSubs = userToSubscriptions[msg.sender].length;
     for (uint256 i = 0; i < _numSubs; i++) {
       _totalDue += _calculateSubscriptionDue(userToSubscriptions[msg.sender][i]);
@@ -355,7 +363,7 @@ contract UserPlanSubscriptions is ServicePlans {
    * @dev fetch all the services owned by the user
    * @return _ownedServicesDetails list of all services owned by the user
    */
-  function getAllOwnedServicesDetails() public view returns (ServiceDetails[] memory) {
+  function getAllOwnedServicesDetails() external view returns (ServiceDetails[] memory) {
     uint256 numServices = ownerToServices[msg.sender].length;
     ServiceDetails[] memory _ownedServicesDetails = new ServiceDetails[](numServices);
     for (uint256 i = 0; i < numServices; i++) {
@@ -375,7 +383,7 @@ contract UserPlanSubscriptions is ServicePlans {
     return _ownedServicesDetails;
   }
 
-  function getAllPlans() public view returns(PlanDetails[] memory) {
+  function getAllPlans() external view returns(PlanDetails[] memory) {
     uint256 numServices = ownerToServices[msg.sender].length;
     uint256 totalNumPlans = 0;
     for (uint256 i = 0; i < numServices; i++) {

@@ -20,8 +20,6 @@ contract('ServicePlans', function(accounts) {
         let planReciept;
         return ServicePlans.new().then(async function(instance) {
             planContract = instance;
-            await expectRevert.unspecified(planContract.createPlan(123, PLAN_CODE, BILLING_FREQ, COST_PER_BILLING, {from: SERVICE_OWNER}), "User not present");
-            await planContract.connect({from: SERVICE_OWNER});
             await expectRevert.unspecified(planContract.createPlan(123, PLAN_CODE, BILLING_FREQ, COST_PER_BILLING, {from: SERVICE_OWNER}), "Service not present");
             return planContract.createService(SERVICE_CODE, {from: SERVICE_OWNER});
         }).then(async function(service_reciept) {
@@ -54,7 +52,6 @@ contract('ServicePlans', function(accounts) {
         let serviceId;
         return ServicePlans.new().then(async function(instance) {
             planContract = instance;
-            await planContract.connect({from: SERVICE_OWNER});
             return planContract.createService(SERVICE_CODE, {from: SERVICE_OWNER});
         }).then(async function(service_reciept) {
             await expectEvent(service_reciept, 'ServiceCreated');

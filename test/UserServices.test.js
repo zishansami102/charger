@@ -16,10 +16,6 @@ contract('UserServices', function(accounts) {
     it('createService: creates the service with input parameters if service code is not already present', function() {
         return UserServices.new().then(async function(instance) {
             serviceContract = instance;
-            await expectRevert.unspecified(serviceContract.createService(SERVICE_CODE, {from: SERVICE_OWNER}), "User not present");
-            return serviceContract.connect({from: SERVICE_OWNER});
-        }).then(async function(reciept) {
-            await expectEvent(reciept, 'UserCreated', {owner:SERVICE_OWNER, balance:(new BN(0)), isActive:true});
             return serviceContract.createService(SERVICE_CODE, {from: SERVICE_OWNER});
         }).then(async function(reciept) {
             await expectEvent(reciept, 'ServiceCreated', {1:SERVICE_OWNER, 2:SERVICE_CODE});
@@ -31,7 +27,6 @@ contract('UserServices', function(accounts) {
         let services;
         return UserServices.new().then(async function(instance) {
             serviceContract = instance;
-            await serviceContract.connect({from: SERVICE_OWNER});
             return serviceContract.getAllOwnedServices({from: SERVICE_OWNER});
         }).then(function(services) {
             return services.length;
