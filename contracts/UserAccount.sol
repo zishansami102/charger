@@ -7,43 +7,14 @@ pragma solidity 0.8.4;
  * @dev Smart Account for users and service providers
  */
 contract UserAccount {
-
-    // uint256 public userCount;
     
     struct User {
         address owner;
         uint256 lastRecordedBalance;
-        // bool isActive;
     }
     
     event BalanceUpdated(address indexed owner, uint balance);
     mapping (address => User) users;
-    
-    // /**
-    //  * @dev Requires user to be present in the user list to be allowed to use the conditioned methods
-    //  */
-    // modifier isActiveUser() {
-    //     require(users[msg.sender].isActive, "User not present");
-    //     _;
-    // } 
-
-    // /**
-    //  * @dev Connect users EOA with the smart account
-    //  */
-    // function connect() internal {
-    //     if (!users[msg.sender].isActive) {
-    //         _createUser();
-    //     }
-    // }
-
-    // /**
-    //  * @dev Create user and add it in the user mapping
-    //  */
-    // function _createUser() private {    
-    //     users[msg.sender] = User(msg.sender, 0, true);
-    //     userCount++;
-    //     emit UserCreated(msg.sender, 0, true);
-    // }
     
     /**
      * @dev Deposit ether in user's smart account

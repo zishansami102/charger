@@ -15,7 +15,7 @@ contract UserServices is UserAccount {
         address owner;
         string serviceCode;
         bool isPresent;
-    }
+    }   
 
     event ServiceCreated(uint256 serviceId, address owner, string serviceCode, bool isPresent);
     

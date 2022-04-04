@@ -97,6 +97,11 @@ contract UserPlanSubscriptions is ServicePlans {
     _;
   }
 
+  /**
+    * @dev calculates the due amount for a given subscriptionId
+    * @param _subscriptionId id of the subscription
+    * @return _subscriptionDue due amount for the given subscription
+    */
   function _calculateSubscriptionDue(uint256 _subscriptionId)
     internal
     view
@@ -129,6 +134,10 @@ contract UserPlanSubscriptions is ServicePlans {
     _subscriptionDue += subscriptions[_subscriptionId].overdue;
   }
 
+  /**
+    * @dev tries settles the due amount for a given subscription from the user's balance
+    * @param _subsId id of the subscription
+    */
   function _settleSubs(uint256 _subsId)
     internal
     subscriptionIsPresent(_subsId)
@@ -167,7 +176,6 @@ contract UserPlanSubscriptions is ServicePlans {
     uint256 _subscriptionId = uint256(
       keccak256(abi.encodePacked(_planId, _userIdHash, msg.sender))
     );
-    // require(!subscriptions[_subscriptionId].isActive, 'User already subscribed to the plan');
 
     if (subscriptions[_subscriptionId].isPresent) {
       _settleSubs(_subscriptionId);
@@ -201,6 +209,10 @@ contract UserPlanSubscriptions is ServicePlans {
     userToSubscriptions[msg.sender].push(_subscriptionId);
   }
 
+  /**
+    * @dev inactivates the subscription for the given id and stops the billing time
+    * @param _subscriptionId id of the subscription
+    */
   function unsubscribe(uint256 _subscriptionId)
     public
     subscriptionIsPresent(_subscriptionId)
@@ -229,6 +241,10 @@ contract UserPlanSubscriptions is ServicePlans {
     emit Unsubscribed(_subscriptionId, subscriptions[_subscriptionId].planId, subscriptions[_subscriptionId].overdue, subscriptions[_subscriptionId].isActive);
   }
 
+  /**
+    * @param _subscriptionId id of the subscription
+    * @return _owner returns the owner of the service for which the subscription was created
+    */
   function _getServiceOwnerOfSubscription(uint256 _subscriptionId)
     private
     view
@@ -238,6 +254,11 @@ contract UserPlanSubscriptions is ServicePlans {
     _owner = services[plans[subscriptions[_subscriptionId].planId].serviceId].owner;
   }
 
+  /**
+    * @dev calculates the total due amount for a given plan
+    * @param _planId id of the plan
+    * @return _collectableFromPlan the total due amount for a given plan
+    */
   function totalCollectableAmountFromPlan(uint256 _planId)
     public
     view
@@ -250,6 +271,11 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev calculates the total due amount by all the users for a given service
+    * @param _serviceId id of the service
+    * @return _collectableFromService the total due amount by all the users for a given service
+    */
   function totalCollectableAmountFromService(uint256 _serviceId)
     public
     view
@@ -263,6 +289,10 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev calculates the total due amount by all the users for all the services owned by the caller
+    * @return _totalCollectableAmount the total due amount by all the users for all the services owned by the caller
+    */
   function totalCollectableAmountFromAllServices()
     public
     view
@@ -274,6 +304,11 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it collects all the due amount from all the subscriptions of a given plan
+    * and transfers it to the owner
+    * @param _planId id of the given plan
+    */
   function collectDueFromAllSubscriptionsOfPlan(uint256 _planId) public planIsPresent(_planId) {
     uint256[] storage _planSubs = planToSubscriptions[_planId];
     for (uint256 k = 0; k < _planSubs.length; k++) {
@@ -281,6 +316,11 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it collects all the due amount from all the plans of a given service
+    * and transfers it to the owner
+    * @param _serviceId id of the given service
+    */
   function collectDueFromAllPlansOfService(uint256 _serviceId)
     public
     serviceIsPresent(_serviceId)
@@ -292,6 +332,10 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it collects all the due amount from all the owned services of the caller
+    * and transfers it to the caller
+    */
   function collectDueFromAllOwnedServices() public {
     uint256[] storage _userServices = ownerToServices[msg.sender];
     for (uint256 i = 0; i < _userServices.length; i++) {
@@ -299,6 +343,10 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it inactivates all the subscriptions of a given plan for all the users whose payments are overdue
+    * @param _planId id of the given plan
+    */
   function inactivateAllOverdueSubscriptionsOfPlan(uint256 _planId) public planIsPresent(_planId) {
     uint256[] storage _planSubs = planToSubscriptions[_planId];
     for (uint256 k = 0; k < _planSubs.length; k++) {
@@ -311,6 +359,10 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it inactivates all the subscriptions of a given service for all the users whose payments are overdue
+    * @param _serviceId id of the given service
+    */
   function inactivateAllOverdueSubscriptionsOfService(uint256 _serviceId)
     public
     serviceIsPresent(_serviceId)
@@ -322,6 +374,10 @@ contract UserPlanSubscriptions is ServicePlans {
     }
   }
 
+  /**
+    * @dev it inactivates all the subscriptions of all the users whose payments are overdue 
+    * for the services owned by the caller
+    */
   function inactivateAllOverdueSubscriptions() external {
     uint256[] storage _userServices = ownerToServices[msg.sender];
     for (uint256 i = 0; i < _userServices.length; i++) {
@@ -330,7 +386,7 @@ contract UserPlanSubscriptions is ServicePlans {
   }
 
   /**
-   * @dev fetch all subscriptions of the user
+   * @return fetch all subscriptions of the user to which the user has subscribed to
    */
   function getSubsByUser() external view returns (UserSubsDetails[] memory) {
     uint256 numSubs = userToSubscriptions[msg.sender].length;
@@ -352,6 +408,10 @@ contract UserPlanSubscriptions is ServicePlans {
     return _userSubs;
   }
 
+  /**
+    * @dev calculates the total amount the user is liable to pay to all of its subscriptions
+    * @return _totalDue the total due amount the user is liable to pay to all of its subscriptions
+    */
   function totalAmountDueToAllSubs() external view returns (uint256 _totalDue) {
     uint256 _numSubs = userToSubscriptions[msg.sender].length;
     for (uint256 i = 0; i < _numSubs; i++) {
@@ -383,6 +443,10 @@ contract UserPlanSubscriptions is ServicePlans {
     return _ownedServicesDetails;
   }
 
+  /**
+   * @dev fetch the list of all the plans of all the services owned by the user
+   * @return _ownedServicesDetails list of all plans for all the services owned by the user
+   */
   function getAllPlans() external view returns(PlanDetails[] memory) {
     uint256 numServices = ownerToServices[msg.sender].length;
     uint256 totalNumPlans = 0;

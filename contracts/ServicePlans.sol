@@ -37,7 +37,7 @@ contract ServicePlans is UserServices {
     * @param _billingFrequency billing frequency type
     * @param _planCode unique identifier for the plan
     * @param _costPerBilling cost per billing cycle
-     */
+    */
     function createPlan(uint256 _serviceId, string memory _planCode, BillingType _billingFrequency, uint256 _costPerBilling) external serviceIsPresent(_serviceId) isOwnerOfService(_serviceId) {
         uint256 _planId = uint256(keccak256(abi.encodePacked(_serviceId, _billingFrequency, _costPerBilling)));
         require(!plans[_planId].isPresent, "Plan is already present");
@@ -57,8 +57,9 @@ contract ServicePlans is UserServices {
 
     /**
     * @dev fetch all the plans of the service
-    * @return _servicePlans list of all plans created under given service
-     */
+    * @param _serviceId id of the service
+    * @return list of all plans created under given service
+    */
     function getPlans(uint256 _serviceId) public view serviceIsPresent(_serviceId) isOwnerOfService(_serviceId) returns(PlanDetailsStruct[] memory) {
         uint256 numPlans = serviceToPlans[_serviceId].length;
         PlanDetailsStruct[] memory _servicePlans = new PlanDetailsStruct[](numPlans);
